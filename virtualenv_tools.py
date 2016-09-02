@@ -14,7 +14,7 @@ import os
 import re
 import sys
 import marshal
-import optparse
+import argparse
 import subprocess
 from types import CodeType
 
@@ -236,27 +236,24 @@ def reinitialize_virtualenv(path):
 
 
 def main():
-    parser = optparse.OptionParser()
-    parser.add_option('--reinitialize', action='store_true',
-                      help='Updates the python installation '
-                      'and reinitializes the virtualenv.')
-    parser.add_option('--update-path', help='Update the path for all '
-                      'required executables and helper files that are '
-                      'supported to the new python prefix.  You can also set '
-                      'this to "auto" for autodetection.')
-    options, paths = parser.parse_args()
-    if not paths:
-        paths = ['.']
+    parser = argparse.ArgumentParser(description='Make virtualenv relocatable.')
+    parser.add_argument('--substitute-python',
+                        help='Reinitializes the virtualenv '
+                             'to use the given Python.')
+    parser.add_argument('--update-path', help='Update the path for all '
+                        'required executables and helper files that are '
+                        'supported to the new Python prefix.')
+    parser.add_argument('path', metavar='VIRTUALENV PATH',
+                        help='Path to virtualenv to be manipulated.')
+    args = parser.parse_args()
 
     rv = 0
 
-    if options.reinitialize:
-        for path in paths:
-            reinitialize_virtualenv(path)
-    if options.update_path:
-        for path in paths:
-            if not update_paths(path, options.update_path):
-                rv = 1
+    if args.substitute_python:
+        reinitialize_virtualenv(args.path, args.substitute_python)
+    if args.update_path:
+        if not update_paths(args.path, args.update_path):
+            rv = 1
     sys.exit(rv)
 
 
