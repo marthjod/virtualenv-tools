@@ -160,8 +160,6 @@ def update_local(base, new_path):
 
 def update_paths(base, new_path):
     """Updates all paths in a virtualenv to a new one."""
-    if new_path == 'auto':
-        new_path = os.path.abspath(base)
     if not os.path.isabs(new_path):
         print('error: %s is not an absolute path' % new_path)
         return False
