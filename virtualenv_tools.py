@@ -188,7 +188,7 @@ def update_paths(base, new_path):
     return True
 
 
-def reinitialize_virtualenv(path):
+def reinitialize_virtualenv(path, substitute_python):
     """Re-initializes a virtualenv."""
     lib_dir = os.path.join(path, 'lib')
     if not os.path.isdir(lib_dir):
@@ -207,7 +207,7 @@ def reinitialize_virtualenv(path):
 
     lib_dir = os.path.join(path, 'lib', py_ver)
 
-    args = ['virtualenv', '-p', sys_py_executable]
+    args = ['virtualenv', '-p', substitute_python]
     if not os.path.isfile(os.path.join(lib_dir,
             'no-global-site-packages.txt')):
         args.append('--system-site-packages')
