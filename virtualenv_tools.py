@@ -89,55 +89,30 @@ def update_scripts(bin_dir, new_path):
             update_script(os.path.join(bin_dir, fn), new_path)
 
 
-def update_pyc(filename, new_path):
-    """Updates the filenames stored in pyc files."""
-    with open(filename, 'rb') as f:
-        magic = f.read(8)
-        code = marshal.load(f)
-
-    def _make_code(code, filename, consts):
-        return CodeType(code.co_argcount, code.co_nlocals, code.co_stacksize,
-                        code.co_flags, code.co_code, tuple(consts),
-                        code.co_names, code.co_varnames, filename,
-                        code.co_name, code.co_firstlineno, code.co_lnotab,
-                        code.co_freevars, code.co_cellvars)
-
-    def _process(code):
-        new_filename = new_path
-        consts = []
-        for const in code.co_consts:
-            if type(const) is CodeType:
-                const = _process(const)
-            consts.append(const)
-        if new_path != code.co_filename or consts != list(code.co_consts):
-            code = _make_code(code, new_path, consts)
-        return code
-
-    new_code = _process(code)
-
-    if new_code is not code:
-        print 'B %s' % filename
-        with open(filename, 'wb') as f:
-            f.write(magic)
-            marshal.dump(new_code, f)
+# TODO
+# File "virtualenv_tools.py", line 98, in update_pyc
+# code = marshal.load(f)
+# ValueError: bad marshal data (unknown type code)
+def remove_pyc(filename):
+    """Get rid of *.pycs"""
+    print('D %s' % filename)
+    os.remove(filename)
 
 
-def update_pycs(lib_dir, new_path, lib_name):
+def remove_pycs(lib_dir, new_path, lib_name):
     """Walks over all pyc files and updates their paths."""
-    files = []
-
-    def get_new_path(filename):
-        filename = os.path.normpath(filename)
-        if filename.startswith(lib_dir.rstrip('/') + '/'):
-            return os.path.join(new_path, filename[len(lib_dir) + 1:])
+    # files = []
+    #
+    # def get_new_path(filename):
+    #     filename = os.path.normpath(filename)
+    #     if filename.startswith(lib_dir.rstrip('/') + '/'):
+    #         return os.path.join(new_path, filename[len(lib_dir) + 1:])
 
     for dirname, dirnames, filenames in os.walk(lib_dir):
         for filename in filenames:
             if filename.endswith(('.pyc', '.pyo')):
                 filename = os.path.join(dirname, filename)
-                local_path = get_new_path(filename)
-                if local_path is not None:
-                    update_pyc(filename, local_path)
+                remove_pyc(filename)
 
 
 def update_local(base, new_path):
@@ -182,7 +157,7 @@ def update_paths(base, new_path):
         return False
 
     update_scripts(bin_dir, new_path)
-    update_pycs(lib_dir, new_path, lib_name)
+    remove_pycs(lib_dir, new_path, lib_name)
     update_local(base, new_path)
 
     return True
@@ -222,6 +197,7 @@ def reinitialize_virtualenv(path, substitute_python):
         if not key.startswith('VIRTUALENV_'):
             new_env[key] = value
     args.append(path)
+
     subprocess.Popen(args, env=new_env).wait()
 
 
