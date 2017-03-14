@@ -204,21 +204,19 @@ def reinitialize_virtualenv(path, substitute_python):
 def main():
     parser = argparse.ArgumentParser(description='Make virtualenv relocatable.')
     parser.add_argument('--substitute-python',
-                        help='Reinitializes the virtualenv '
+                        help='Reinitializes the virtualenv in . '
                              'to use the given Python.')
     parser.add_argument('--update-path', help='Update the path for all '
                         'required executables and helper files that are '
                         'supported to the new Python prefix.')
-    parser.add_argument('path', metavar='VIRTUALENV PATH',
-                        help='Path to virtualenv to be manipulated.')
     args = parser.parse_args()
 
     rv = 0
 
     if args.substitute_python:
-        reinitialize_virtualenv(args.path, args.substitute_python)
+        reinitialize_virtualenv('.', args.substitute_python)
     if args.update_path:
-        if not update_paths(args.path, args.update_path):
+        if not update_paths('.', args.update_path):
             rv = 1
     sys.exit(rv)
 
