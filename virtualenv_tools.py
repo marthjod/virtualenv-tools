@@ -217,6 +217,7 @@ def main():
     if args.substitute_python:
         reinitialize_virtualenv('.', args.substitute_python)
     if args.update_path:
+        print('Update path: %s' % args.update_path)
         if not update_paths('.', args.update_path):
             rv = 1
     sys.exit(rv)
